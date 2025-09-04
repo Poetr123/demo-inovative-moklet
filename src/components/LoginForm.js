@@ -72,4 +72,31 @@ const LoginForm = () => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-telkom-red dark:bg-gray-700 dark:text-white"
+            required
+          />
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-telkom-red text-white py-2 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+        >
+          {loading ? 'Memproses...' : isLogin ? 'Login' : 'Daftar'}
+        </button>
+      </form>
+      
+      <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
+        {isLogin ? 'Belum punya akun? ' : 'Sudah punya akun? '}
+        <button
+          onClick={() => setIsLogin(!isLogin)}
+          className="text-telkom-red hover:underline"
+        >
+          {isLogin ? 'Daftar di sini' : 'Login di sini'}
+        </button>
+      </p>
+    </div>
+  );
+};
+
+export default LoginForm;
