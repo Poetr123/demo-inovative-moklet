@@ -1362,17 +1362,19 @@
                     }
                 },
                 showNotification(message, type = 'success') {
-                    this.notification = {
-                        show: true,
-                        message,
-                        type
-                    };
-                    
-                    // Auto hide after 3 seconds
-                    setTimeout(() => {
-                        this.notification.show = false;
-                    }, 7000);
-                },
+                this.notification.show = true;
+                  this.notification.message = message;
+                    this.notification.type = type;
+
+                if (this._notifTimeout) {
+                    clearTimeout(this._notifTimeout);
+            }
+                        const duration = type === 'error' ? 8000 : 5000;
+                        this._notifTimeout = setTimeout(() => {
+                    this.notification.show = false;
+                }, duration);
+            },
+
                 getJurusanName(jurusanCode) {
                     const jurusanMap = {
                         'rpl': 'RPL',
