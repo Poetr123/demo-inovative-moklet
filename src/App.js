@@ -5,21 +5,50 @@ import IdeaForm from './components/IdeaForm';
 import IdeaCard from './components/IdeaCard';
 import Leaderboard from './components/Leaderboard';
 import LoginForm from './components/LoginForm';
-import { useSupabase } from './hooks/useSupabase';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ThemeToggle from './components/ThemeToggle';
+import { createClient } from '@supabase/supabase-js';
 import './App.css';
 
-function AppContent() {
+// Initialize Supabase
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+function App() {
   const [ideas, setIdeas] = useState([]);
   const [topIdeas, setTopIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const supabase = useSupabase();
-  const { user } = useAuth();
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
-    fetchIdeas();
-    fetchTopIdeas();
+    // Check active sessions and sets the user
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setAuthLoading(false);
+    };
+
+    getSession();
+
+    // Listen for changes on auth state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null);
+        setAuthLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchIdeas();
+      fetchTopIdeas();
+    }
+  }, [user]);
 
   const fetchIdeas = async () => {
     const { data, error } = await supabase
@@ -87,12 +116,61 @@ function AppContent() {
     fetchTopIdeas();
   };
 
+  const handleLogin = async (email, password, isLogin) => {
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        
+        // Create user profile
+        await supabase
+          .from('profiles')
+          .insert([{ id: (await supabase.auth.getUser()).data.user.id, username: email.split('@')[0] }]);
+      }
+      setShowLogin(false);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-telkom-red border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-        <Header />
+        <header className="bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-telkom-red rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">T</span>
+              </div>
+              <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+                Inovasi <span className="text-red-600">Siswa</span>
+              </h1>
+            </div>
+            <ThemeToggle />
+          </div>
+        </header>
+        
         <div className="container mx-auto px-4 py-8">
-          <LoginForm />
+          <QuoteSection />
+          <LoginForm onLogin={handleLogin} />
         </div>
       </div>
     );
@@ -100,7 +178,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <Header />
+      <Header user={user} onLogout={handleLogout} />
       
       <div className="container mx-auto px-4 py-8">
         <QuoteSection />
@@ -124,6 +202,7 @@ function AppContent() {
                 <IdeaCard 
                   key={idea.id} 
                   idea={idea} 
+                  user={user}
                   onLikeToggle={handleLikeToggle}
                 />
               ))
@@ -140,21 +219,13 @@ function AppContent() {
                 dan menginspirasi sesama siswa untuk terus berkarya.
               </p>
               <p className="text-gray-600 dark:text-gray-300">
-                <span className="font-semibold telkom-red">Attitude is Everything!</span>
+                <span className="font-semibold text-red-600">Attitude is Everything!</span>
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
   );
 }
 
