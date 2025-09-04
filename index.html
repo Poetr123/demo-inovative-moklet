@@ -1132,17 +1132,22 @@
                     this.newIdea.imageFile = null;
                     this.newIdea.imagePreview = null;
                 },
-                async addIdea() {
-                    if (!this.user) {
-                        this.showNotification('Silakan login terlebih dahulu', 'error');
-                        return;
-                    }
-                    
-                    this.isSubmitting = true;
-                    
+               async addIdea() {
+                if (!this.user) {
+              this.showNotification('Silakan login terlebih dahulu', 'error');
+                return;
+                }
+              if (this.newIdea.title.length < 5 || this.newIdea.title.length > 70) {
+             this.showNotification('Judul harus 5-70 karakter', 'error');
+                return;
+                }    
+                if (this.newIdea.description.length < 15 || this.newIdea.description.length > 3000) {
+                this.showNotification('Deskripsi harus 15-3000 karakter', 'error');
+                    return;
+                        }
+                this.isSubmitting = true;
                     try {
-                        let imageUrl = null;
-                        
+                let imageUrl = null;
                         // Upload image if exists
                         if (this.newIdea.imageFile) {
                             const fileExt = this.newIdea.imageFile.name.split('.').pop();
@@ -1200,6 +1205,23 @@
                         this.isSubmitting = false;
                     }
                 },
+                async deleteIdea(ideaId, index) {
+                    if (!confirm("Apakah kamu yakin ingin menghapus ide ini?")) return;
+                    try {
+        const { error } = await supabase
+            .from('ideas')
+            .delete()
+            .eq('id', ideaId)
+            .eq('user_id', this.user.id); // pastikan hanya bisa hapus ide sendiri
+                if (error) throw error;
+                this.ideas.splice(index, 1);
+                this.showNotification("Ide berhasil dihapus", "success");
+                } catch (error) {
+                console.error("Error deleting idea:", error);
+            this.showNotification("Gagal menghapus ide: " + error.message, "error");
+         }
+    },
+
                 async toggleLike(ideaId, index) {
                     if (!this.user) {
                         this.showNotification('Silakan login terlebih dahulu', 'error');
