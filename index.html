@@ -635,7 +635,7 @@
             font-weight: 500;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 1100;
-            display: flex;
+            display: none;
              align-items: center;
             gap: 10px;
 
@@ -646,21 +646,16 @@
 
 
             .notification.show {
-            opacity: 1;
-            transform: translateY(0);
+            display: flex;
         }
 
 
-            .notification.success {
-            background-color: #2ecc71; /* hijau */
-            color: #fff;
-        }
-
+           .notification.success {
+             background-color: #2ecc71; 
+           }
             .notification.error {
-            background-color: #e74c3c; /* merah */
-            color: #fff;
-        }
-
+                background-color: #e74c3c; 
+            }
 
         /* Responsive */
         @media (max-width: 768px) {
