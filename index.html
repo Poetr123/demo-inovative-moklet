@@ -623,7 +623,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Notification */
         .notification {
             position: fixed;
             top: 20px;
@@ -653,7 +652,6 @@
             background-color: #2ecc71;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -943,7 +941,7 @@
                 <span x-text="notification.message"></span>
         </div>
     <script>
-        // Supabase configuration - Ganti dengan URL dan Key Supabase Anda
+        // Supabase configuration
         const SUPABASE_URL = 'https://gnhynwlklmnamouyayyd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc';
         
@@ -1007,17 +1005,10 @@
                     type: 'success' // 'success' or 'error'
                 },
                 async init() {
-                    // Load quotes
                     this.showRandomQuote();
-                    
-                    // Check if user is logged in
                     const { data: { session } } = await supabase.auth.getSession();
                     this.user = session?.user ?? null;
-                    
-                    // Load ideas
                     await this.loadIdeas();
-                    
-                    // Listen for auth changes
                     supabase.auth.onAuthStateChange((event, session) => {
                         console.log('Auth state changed:', event, session);
                         this.user = session?.user ?? null;
@@ -1037,7 +1028,6 @@
                 },
                 async loadIdeas() {
                     try {
-                        // Load ideas with vote counts
                         const { data: ideas, error } = await supabase
                             .from('ideas')
                                 .select(`
@@ -1045,17 +1035,12 @@
                                     votes(count),
                                  user_votes:votes(user_id)
                                         `)
-                                    .order('created_at', { ascending: false });
-
-                            
+                                    .order('created_at', { ascending: false });                            
                         if (error) {
                             console.error('Error loading ideas:', error);
-                            // Fallback to sample data if there's an error
                             this.ideas = this.getSampleIdeas();
                             return;
                         }
-                        
-                        // Process ideas data
                         this.ideas = ideas.map(idea => {
                             const hasLiked = this.user ? 
                                 idea.user_votes.some(vote => vote.user_id === this.user.id) : 
@@ -1075,7 +1060,6 @@
                         });
                     } catch (error) {
                         console.error('Error loading ideas:', error);
-                        // Fallback to sample data
                         this.ideas = this.getSampleIdeas();
                     }
                 },
@@ -1116,21 +1100,16 @@
                 handleImageUpload(event) {
                     const file = event.target.files[0];
                     if (file) {
-                        // Check if file is an image
                         if (!file.type.match('image.*')) {
                             this.showNotification('Harus memilih file gambar', 'error');
                             return;
                         }
-                        
-                        // Check file size (max 2MB)
                         if (file.size > 2 * 1024 * 1024) {
                             this.showNotification('Ukuran gambar maksimal 2MB', 'error');
                             return;
                         }
                         
                         this.newIdea.imageFile = file;
-                        
-                        // Create preview
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.newIdea.imagePreview = e.target.result;
@@ -1158,7 +1137,6 @@
                 this.isSubmitting = true;
                     try {
                 let imageUrl = null;
-                        // Upload image if exists
                         if (this.newIdea.imageFile) {
                             const fileExt = this.newIdea.imageFile.name.split('.').pop();
                             const fileName = `${Math.random()}.${fileExt}`;
@@ -1169,16 +1147,12 @@
                                 .upload(filePath, this.newIdea.imageFile);
                                 
                             if (uploadError) throw uploadError;
-                            
-                            // Get public URL
                             const { data: { publicUrl } } = supabase.storage
                                 .from('ideas')
                                 .getPublicUrl(filePath);
                                 
                             imageUrl = publicUrl;
                         }
-                        
-                        // Insert idea to database
                         const { error } = await supabase
                             .from('ideas')
                             .insert([
@@ -1193,8 +1167,6 @@
                             ]);
                             
                         if (error) throw error;
-                        
-                        // Reset form
                         this.newIdea = {
                             name: '',
                             jurusan: '',
@@ -1203,8 +1175,6 @@
                             imageFile: null,
                             imagePreview: null
                         };
-                        
-                        // Reload ideas
                         await this.loadIdeas();
                         
                         this.showNotification('Ide berhasil dikirim!', 'success');
@@ -1222,9 +1192,9 @@
                     .from('ideas')
                      .delete()
                     .eq('id', ideaId)
-                    .eq('user_id', this.user.id); // pastikan hanya hapus ide milik sendiri
+                    .eq('user_id', this.user.id);
                  if (error) throw error;
-                this.ideas.splice(index, 1); // hapus dari list di frontend juga
+                this.ideas.splice(index, 1);
                     this.showNotification("Ide berhasil dihapus", "success");
                     } catch (error) {
                     console.error("Error deleting idea:", error);
@@ -1276,7 +1246,6 @@
                     this.isLoggingIn = true;
                     
                     try {
-                        // Validate email format
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(this.login.email)) {
                             throw new Error('Format email tidak valid');
@@ -1293,7 +1262,6 @@
                         
                         if (error) throw error;
                         
-                        // Reset login form
                         this.login = {
                             email: '',
                             password: ''
@@ -1319,7 +1287,6 @@
                     this.isRegistering = true;
                     
                     try {
-                        // Validate email format
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (!emailRegex.test(this.register.email)) {
                             throw new Error('Format email tidak valid');
@@ -1384,7 +1351,6 @@
                     return jurusanMap[jurusanCode] || 'Unknown';
                 },
                 get topIdeas() {
-                    // Sort ideas by votes and return top 3
                     return [...this.ideas]
                         .sort((a, b) => b.votes_count - a.votes_count)
                         .slice(0, 3);
