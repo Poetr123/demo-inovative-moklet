@@ -1019,12 +1019,13 @@
                         // Load ideas with vote counts
                         const { data: ideas, error } = await supabase
                             .from('ideas')
-                            .select(`
-                                *,
-                                votes(count),
-                                user_votes:votes!inner(user_id)
-                            `)
-                            .order('created_at', { ascending: false });
+                                .select(`
+                                    *,
+                                    votes(count),
+                                 user_votes:votes(user_id)
+                                        `)
+                                    .order('created_at', { ascending: false });
+
                             
                         if (error) {
                             console.error('Error loading ideas:', error);
