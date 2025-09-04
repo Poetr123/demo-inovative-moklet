@@ -23,7 +23,7 @@ body {
   border-color: #e11d48;
 }
 
-.hover-bg-telkom-red:hover {
+.hover\:bg-telkom-red:hover {
   background-color: #e11d48;
 }
 
