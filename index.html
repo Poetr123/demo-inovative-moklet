@@ -924,7 +924,7 @@
     <script>
         // Supabase configuration - Ganti dengan URL dan Key Supabase Anda
         const SUPABASE_URL = 'https://gnhynwlklmnamouyayyd.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduaHlud2xrbG1uYW1vdXlheXlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5ODEzNTYsImV4cCI6MjA3MjU1NzM1Nn0.lP8ReorP4CvZQ1QxFjCclRjLHChjjaF37ZBrSmA-InM';
         
         // Initialize Supabase
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -1014,47 +1014,218 @@
                     const randomIndex = Math.floor(Math.random() * this.quotes.length);
                     this.currentQuote = this.quotes[randomIndex];
                 },
-               async loadIdeas() {
-    try {
-        // Ambil semua ide, meskipun belum ada vote
-        const { data: ideas, error } = await supabase
-            .from('ideas')
-            .select(`
-                *,
-                votes(count),
-                user_votes:votes(user_id)
-            `)
-            .order('created_at', { ascending: false });
-            
-        if (error) {
-            console.error('Error loading ideas:', error);
-            // fallback ke sample data
-            this.ideas = this.getSampleIdeas();
-            return;
-        }
-
-        // Proses hasil query
-        this.ideas = ideas.map(idea => {
-            const hasLiked = this.user
-                ? idea.user_votes?.some(vote => vote.user_id === this.user.id)
-                : false;
-
-            return {
-                id: idea.id,
-                user_name: idea.user_name,
-                jurusan: idea.jurusan,
-                title: idea.title,
-                description: idea.description,
-                image_url: idea.image_url,
-                votes_count: idea.votes?.[0]?.count || 0,
-                hasLiked: hasLiked
-            };
-        });
-    } catch (error) {
-        console.error('Error loading ideas:', error);
-        this.ideas = this.getSampleIdeas();
-    }
-},
+                async loadIdeas() {
+                    try {
+                        // Load ideas with vote counts
+                        const { data: ideas, error } = await supabase
+                            .from('ideas')
+                            .select(`
+                                *,
+                                votes(count),
+                                user_votes:votes!inner(user_id)
+                            `)
+                            .order('created_at', { ascending: false });
+                            
+                        if (error) {
+                            console.error('Error loading ideas:', error);
+                            // Fallback to sample data if there's an error
+                            this.ideas = this.getSampleIdeas();
+                            return;
+                        }
+                        
+                        // Process ideas data
+                        this.ideas = ideas.map(idea => {
+                            const hasLiked = this.user ? 
+                                idea.user_votes.some(vote => vote.user_id === this.user.id) : 
+                                false;
+                                
+                            return {
+                                id: idea.id,
+                                user_name: idea.user_name,
+                                jurusan: idea.jurusan,
+                                title: idea.title,
+                                description: idea.description,
+                                image_url: idea.image_url,
+                                votes_count: idea.votes[0]?.count || 0,
+                                hasLiked: hasLiked
+                            };
+                        });
+                    } catch (error) {
+                        console.error('Error loading ideas:', error);
+                        // Fallback to sample data
+                        this.ideas = this.getSampleIdeas();
+                    }
+                },
+                getSampleIdeas() {
+                    return [
+                        {
+                            id: 1,
+                            user_name: "Ahmad RPL",
+                            jurusan: "rpl",
+                            title: "Aplikasi Management Tugas Sekolah",
+                            description: "Aplikasi mobile untuk membantu siswa mengelola tugas sekolah dengan fitur reminder dan kolaborasi.",
+                            image_url: null,
+                            votes_count: 15,
+                            hasLiked: false
+                        },
+                        {
+                            id: 2,
+                            user_name: "Sari TKJ",
+                            jurusan: "tkj",
+                            title: "Jaringan IoT untuk Smart Classroom",
+                            description: "Implementasi jaringan Internet of Things untuk membuat ruang kelas pintar dengan kontrol otomatis.",
+                            image_url: null,
+                            votes_count: 12,
+                            hasLiked: false
+                        },
+                        {
+                            id: 3,
+                            user_name: "Budi PG",
+                            jurusan: "pg",
+                            title: "Game Edukasi Sejarah Indonesia",
+                            description: "Game mobile interaktif untuk mempelajari sejarah Indonesia dengan cara yang menyenangkan.",
+                            image_url: null,
+                            votes_count: 18,
+                            hasLiked: false
+                        }
+                    ];
+                },
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        // Check if file is an image
+                        if (!file.type.match('image.*')) {
+                            this.showNotification('Harus memilih file gambar', 'error');
+                            return;
+                        }
+                        
+                        // Check file size (max 2MB)
+                        if (file.size > 2 * 1024 * 1024) {
+                            this.showNotification('Ukuran gambar maksimal 2MB', 'error');
+                            return;
+                        }
+                        
+                        this.newIdea.imageFile = file;
+                        
+                        // Create preview
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.newIdea.imagePreview = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                removeImage() {
+                    this.newIdea.imageFile = null;
+                    this.newIdea.imagePreview = null;
+                },
+                async addIdea() {
+                    if (!this.user) {
+                        this.showNotification('Silakan login terlebih dahulu', 'error');
+                        return;
+                    }
+                    
+                    this.isSubmitting = true;
+                    
+                    try {
+                        let imageUrl = null;
+                        
+                        // Upload image if exists
+                        if (this.newIdea.imageFile) {
+                            const fileExt = this.newIdea.imageFile.name.split('.').pop();
+                            const fileName = `${Math.random()}.${fileExt}`;
+                            const filePath = `idea-images/${fileName}`;
+                            
+                            const { error: uploadError } = await supabase.storage
+                                .from('ideas')
+                                .upload(filePath, this.newIdea.imageFile);
+                                
+                            if (uploadError) throw uploadError;
+                            
+                            // Get public URL
+                            const { data: { publicUrl } } = supabase.storage
+                                .from('ideas')
+                                .getPublicUrl(filePath);
+                                
+                            imageUrl = publicUrl;
+                        }
+                        
+                        // Insert idea to database
+                        const { error } = await supabase
+                            .from('ideas')
+                            .insert([
+                                {
+                                    user_id: this.user.id,
+                                    user_name: this.newIdea.name || this.user.user_metadata.full_name || this.user.email,
+                                    jurusan: this.newIdea.jurusan,
+                                    title: this.newIdea.title,
+                                    description: this.newIdea.description,
+                                    image_url: imageUrl
+                                }
+                            ]);
+                            
+                        if (error) throw error;
+                        
+                        // Reset form
+                        this.newIdea = {
+                            name: '',
+                            jurusan: '',
+                            title: '',
+                            description: '',
+                            imageFile: null,
+                            imagePreview: null
+                        };
+                        
+                        // Reload ideas
+                        await this.loadIdeas();
+                        
+                        this.showNotification('Ide berhasil dikirim!', 'success');
+                    } catch (error) {
+                        console.error('Error adding idea:', error);
+                        this.showNotification('Gagal mengirim ide: ' + error.message, 'error');
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+                async toggleLike(ideaId, index) {
+                    if (!this.user) {
+                        this.showNotification('Silakan login terlebih dahulu', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        const idea = this.ideas[index];
+                        
+                        if (idea.hasLiked) {
+                            // Unlike
+                            const { error } = await supabase
+                                .from('votes')
+                                .delete()
+                                .eq('idea_id', ideaId)
+                                .eq('user_id', this.user.id);
+                                
+                            if (error) throw error;
+                            
+                            this.ideas[index].votes_count--;
+                            this.ideas[index].hasLiked = false;
+                        } else {
+                            // Like
+                            const { error } = await supabase
+                                .from('votes')
+                                .insert([
+                                    { idea_id: ideaId, user_id: this.user.id }
+                                ]);
+                                
+                            if (error) throw error;
+                            
+                            this.ideas[index].votes_count++;
+                            this.ideas[index].hasLiked = true;
+                        }
+                    } catch (error) {
+                        console.error('Error toggling like:', error);
+                        this.showNotification('Gagal melakukan vote', 'error');
+                    }
+                },
                 async signIn() {
                     this.isLoggingIn = true;
                     
@@ -1089,45 +1260,52 @@
                     }
                 },
                 async signUp() {
-    if (this.register.password !== this.register.confirmPassword) {
-        this.showNotification('Konfirmasi password tidak sesuai', 'error');
-        return;
-    }
-    
-    if (this.register.password.length < 6) {
-        this.showNotification('Password minimal 6 karakter', 'error');
-        return;
-    }
-    
-    this.isRegistering = true;
-    
-    try {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(this.register.email)) {
-            throw new Error('Format email tidak valid');
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-            email: this.register.email,
-            password: this.register.password,
-            options: {
-                data: { full_name: this.register.name },
-                emailRedirectTo: "https://demo-inovative-moklet.vercel.app/" 
-            }
-        });
-
-        if (error) throw error;
-
-        this.showNotification('Registrasi berhasil! Silakan cek email untuk verifikasi.', 'success');
-        this.showRegisterModal = false;
-        this.register = { name: '', email: '', password: '', confirmPassword: '' };
-    } catch (error) {
-        console.error('Error signing up:', error);
-        this.showNotification(error.message, 'error');
-    } finally {
-        this.isRegistering = false;
-    }
-}
+                    if (this.register.password !== this.register.confirmPassword) {
+                        this.showNotification('Konfirmasi password tidak sesuai', 'error');
+                        return;
+                    }
+                    
+                    if (this.register.password.length < 6) {
+                        this.showNotification('Password minimal 6 karakter', 'error');
+                        return;
+                    }
+                    
+                    this.isRegistering = true;
+                    
+                    try {
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(this.register.email)) {
+                            throw new Error('Format email tidak valid');
+                        }
+                        
+                        const { data, error } = await supabase.auth.signUp({
+                            email: this.register.email,
+                            password: this.register.password,
+                            options: {
+                                data: {
+                                    full_name: this.register.name
+                                }
+                            }
+                        });
+                        
+                        if (error) throw error;
+                        
+                        this.showNotification('Registrasi berhasil! Silakan login.', 'success');
+                        this.showRegisterModal = false;
+                        this.register = {
+                            name: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: ''
+                        };
+                    } catch (error) {
+                        console.error('Error signing up:', error);
+                        this.showNotification(error.message, 'error');
+                    } finally {
+                        this.isRegistering = false;
+                    }
+                },
                 async signOut() {
                     try {
                         const { error } = await supabase.auth.signOut();
