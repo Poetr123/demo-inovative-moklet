@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.telkom-red {
+  color: #e11d48;
+}
+
+.bg-telkom-red {
+  background-color: #e11d48;
+}
+
+.border-telkom-red {
+  border-color: #e11d48;
+}
+
+.hover-bg-telkom-red:hover {
+  background-color: #e11d48;
+}
+
+.badge-rpl {
+  background-color: #3B82F6;
+  color: white;
+}
+
+.badge-tkj {
+  background-color: #10B981;
+  color: white;
+}
+
+.badge-pg {
+  background-color: #8B5CF6;
+  color: white;
+}
+
+.idea-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.idea-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e11d48;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #be123c;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #9f1239;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #831843;
+}
