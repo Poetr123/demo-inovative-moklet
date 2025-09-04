@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="id" x-data="app()" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inovasi Siswa - SMK Telkom Malang</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #E11B22;
+            --primary-dark: #C0171C;
+            --secondary: #FFFFFF;
+            --accent-rpl: #3498db;
+            --accent-tkj: #2ecc71;
+            --accent-pg: #9b59b6;
+            --text-light: #333333;
+            --text-dark: #FFFFFF;
+            --bg-light: #FFFFFF;
+            --bg-dark: #1A1A1A;
+            --card-light: #F8F9FA;
+            --card-dark: #2D2D2D;
+            --border-light: #E0E0E0;
+            --border-dark: #404040;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .dark body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: var(--secondary);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .auth-btn {
+            background: none;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--secondary);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: 15px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--secondary);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 30px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: var(--primary);
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Quotes Section */
+        .quotes {
+            background-color: var(--card-light);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .quotes {
+            background-color: var(--card-dark);
+        }
+
+        .quotes i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .quote-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .quote-author {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-light);
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark .modal-content {
+            background-color: var(--bg-dark);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .dark .close-modal {
+            color: var(--text-dark);
+        }
+
+        /* Idea Form */
+        .idea-form {
+            background-color: var(--card-light);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .idea-form {
+            background-color: var(--card-dark);
+        }
+
+        .idea-form h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .dark .form-group input,
+        .dark .form-group textarea,
+        .dark .form-group select {
+            border-color: var(--border-dark);
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed var(--border-light);
+            border-radius: 6px;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dark .file-upload-label {
+            border-color: var(--border-dark);
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+        }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .file-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            background-color: var(--primary);
+            color: var(--secondary);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .submit-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Ideas Grid */
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .idea-card {
+            background-color: var(--card-light);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .dark .idea-card {
+            background-color: var(--card-dark);
+        }
+
+        .idea-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .idea-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .idea-header {
+            padding: 15px;
+            color: var(--secondary);
+        }
+
+        .idea-header.rpl {
+            background-color: var(--accent-rpl);
+        }
+
+        .idea-header.tkj {
+            background-color: var(--accent-tkj);
+        }
+
+        .idea-header.pg {
+            background-color: var(--accent-pg);
+        }
+
+        .idea-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .idea-content {
+            padding: 15px;
+        }
+
+        .idea-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .idea-description {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .idea-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .dark .idea-footer {
+            border-top-color: var(--border-dark);
+        }
+
+        .vote-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .dark .vote-btn {
+            color: var(--text-dark);
+        }
+
+        .vote-btn.active {
+            color: var(--primary);
+        }
+
+        .vote-count {
+            font-weight: 600;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background-color: var(--card-light);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .leaderboard {
+            background-color: var(--card-dark);
+        }
+
+        .leaderboard h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .leaderboard-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-item {
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 300px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .dark .leaderboard-item {
+            background-color: var(--bg-dark);
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .rank-1 {
+            background-color: gold;
+            color: #333 !important;
+        }
+
+        .rank-2 {
+            background-color: silver;
+        }
+
+        .rank-3 {
+            background-color: #cd7f32; /* Bronze */
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary);
+            color: var(--secondary);
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p {
+            line-height: 1.6;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--secondary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            background-color: var(--primary);
+            color: var(--secondary);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background-color: #e74c3c;
+        }
+
+        .notification.success {
+            background-color: #2ecc71;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .ideas-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .leaderboard-items {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="20" fill="white"/>
+                        <path d="M26 12H14V28H26V12Z" fill="#E11B22"/>
+                        <path d="M18 18H22V22H18V18Z" fill="white"/>
+                    </svg>
+                    <div class="logo-text">Inovasi Siswa</div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#share">Share Ide</a></li>
+                        <li><a href="#ideas">Ide Terkini</a></li>
+                        <li><a href="#leaderboard">Leaderboard</a></li>
+                    </ul>
+                </nav>
+                <div class="auth-buttons" x-show="!user">
+                    <button class="auth-btn" @click="showLoginModal = true">Login</button>
+                    <button class="auth-btn" @click="showRegisterModal = true">Register</button>
+                </div>
+                <div class="user-info" x-show="user">
+                    <img :src="user.user_metadata.avatar_url || 'https://via.placeholder.com/35'" alt="Avatar" class="user-avatar">
+                    <span x-text="user.user_metadata.full_name || user.email"></span>
+                    <button class="auth-btn" @click="signOut">Logout</button>
+                </div>
+                <button class="theme-toggle" @click="darkMode = !darkMode">
+                    <i x-show="!darkMode" class="fas fa-moon"></i>
+                    <i x-show="darkMode" class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Wadah Inovasi Siswa SMK Telkom Malang</h1>
+            <p>"Attitude is Everything" - Temukan, bagikan, dan dukung ide-ide inovatif dari siswa SMK Telkom Malang</p>
+            <a href="#share" class="cta-button">Bagikan Ide Mu</a>
+        </div>
+    </section>
+
+    <main class="container">
+        <section class="quotes">
+            <i class="fas fa-quote-left"></i>
+            <div class="quote-text" x-text="currentQuote.text"></div>
+            <div class="quote-author" x-text="currentQuote.author"></div>
+        </section>
+
+        <section class="idea-form" id="share">
+            <h2>Bagikan Ide Inovatif Mu</h2>
+            <form @submit.prevent="addIdea" x-show="user">
+                <div class="form-group">
+                    <label for="name">Nama</label>
+                    <input type="text" id="name" x-model="newIdea.name" required placeholder="Nama kamu" :value="user.user_metadata.full_name || ''">
+                </div>
+                <div class="form-group">
+                    <label for="jurusan">Jurusan</label>
+                    <select id="jurusan" x-model="newIdea.jurusan" required>
+                        <option value="">Pilih Jurusan</option>
+                        <option value="rpl">Rekayasa Perangkat Lunak (RPL)</option>
+                        <option value="tkj">Teknik Komputer dan Jaringan (TKJ)</option>
+                        <option value="pg">Pengembangan Gim (PG)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="title">Judul Ide</label>
+                    <input type="text" id="title" x-model="newIdea.title" required placeholder="Judul ide inovatif kamu">
+                </div>
+                <div class="form-group">
+                    <label for="description">Deskripsi Ide</label>
+                    <textarea id="description" x-model="newIdea.description" required placeholder="Jelaskan ide kamu secara detail..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="image">Gambar Ide (Opsional)</label>
+                    <div class="file-upload">
+                        <input type="file" id="image" class="file-upload-input" @change="handleImageUpload" accept="image/*">
+                        <label for="image" class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Pilih gambar atau seret ke sini</span>
+                        </label>
+                    </div>
+                    <div class="file-preview" x-show="newIdea.imagePreview">
+                        <img :src="newIdea.imagePreview" alt="Preview">
+                        <button type="button" @click="removeImage" class="auth-btn" style="margin-top: 10px;">Hapus Gambar</button>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" :disabled="isSubmitting">
+                    <span x-show="!isSubmitting">Kirim Ide</span>
+                    <span x-show="isSubmitting" class="loading"></span>
+                </button>
+            </form>
+            <div x-show="!user" style="text-align: center; padding: 30px;">
+                <p>Silakan login terlebih dahulu untuk berbagi ide inovatif.</p>
+                <button class="auth-btn" @click="showLoginModal = true" style="margin-top: 15px;">Login Sekarang</button>
+            </div>
+        </section>
+
+       <section id="ideas">
+    <h2>Ide-Ide Inovatif Terkini</h2>
+    <div class="ideas-grid">
+        <template x-for="(idea, index) in ideas" :key="idea.id">
+            <div class="idea-card">
+                <div class="idea-header" :class="idea.jurusan">
+                    <span class="idea-badge" x-text="getJurusanName(idea.jurusan)"></span>
+                </div>
+                <img :src="idea.image_url || 'https://via.placeholder.com/300x180/cccccc/969696?text=No+Image'" 
+                     alt="Idea Image" class="idea-image" x-show="idea.image_url">
+                <div class="idea-content">
+                    <h3 class="idea-title" x-text="idea.title"></h3>
+                    <p class="idea-description" x-text="idea.description"></p>
+                </div>
+                <div class="idea-footer">
+                    <span x-text="idea.user_name"></span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="vote-btn" 
+                            :class="{ 'active': idea.hasLiked }" 
+                            @click="toggleLike(idea.id, index)" 
+                            :disabled="!user">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="vote-count" x-text="idea.votes_count"></span>
+                        </button>
+                        <button class="vote-btn" 
+                            x-show="user && user.id === idea.user_id"
+                            @click="deleteIdea(idea.id, index)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</section>
+
+
+        <section class="leaderboard" id="leaderboard">
+            <h2>Top 3 Inovasi Siswa Minggu Ini</h2>
+            <div class="leaderboard-items">
+                <template x-for="(idea, index) in topIdeas" :key="idea.id">
+                    <div class="leaderboard-item">
+                        <div class="rank-badge" :class="'rank-' + (index + 1)" x-text="index + 1"></div>
+                        <div class="idea-header" :class="idea.jurusan">
+                            <span class="idea-badge" x-text="getJurusanName(idea.jurusan)"></span>
+                        </div>
+                        <img :src="idea.image_url || 'https://via.placeholder.com/300x180/cccccc/969696?text=No+Image'" alt="Idea Image" class="idea-image" x-show="idea.image_url">
+                        <div class="idea-content">
+                            <h3 class="idea-title" x-text="idea.title"></h3>
+                            <p class="idea-description" x-text="idea.description"></p>
+                        </div>
+                       <div class="idea-footer">
+                            <span x-text="idea.user_name"></span>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button class="vote-btn" 
+                                :class="{ 'active': idea.hasLiked }" 
+                                @click="toggleLike(idea.id, index)" 
+                                :disabled="!user">
+                            <i class="fas fa-thumbs-up"></i>
+                        <span class="vote-count" x-text="idea.votes_count"></span>
+                    </button>
+                   <button class="vote-btn" 
+                              x-show="user && user.id === idea.user_id"
+                                  @click="deleteIdea(idea.id, index)">
+                                        <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                </template>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SMK Telkom Malang</h3>
+                    <p>Sekolah Menengah Kejuruan yang menghasilkan lulusan siap kerja di bidang teknologi informasi dan komunikasi.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Jurusan</h3>
+                    <p>RPL (Rekayasa Perangkat Lunak)</p>
+                    <p>TKJ (Teknik Komputer dan Jaringan)</p>
+                    <p>PG (Pengembangan Gim)</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Kontak</h3>
+                    <p>Jl. Danau Ranau, Sawojajar, Kec. Kedungkandang, Kota Malang, Jawa Timur 65139</p>
+                    <p>Telp: (0341) 1234567</p>
+                    <p>Email: info@smktelkom-mlg.sch.id</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SMK Telkom Malang. Attitude is Everything.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal" :class="{ 'show': showLoginModal }">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Login</h3>
+                <button class="close-modal" @click="showLoginModal = false">&times;</button>
+            </div>
+            <form @submit.prevent="signIn">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" x-model="login.email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" x-model="login.password" required>
+                </div>
+                <button type="submit" class="submit-btn" :disabled="isLoggingIn">
+                    <span x-show="!isLoggingIn">Login</span>
+                    <span x-show="isLoggingIn" class="loading"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" :class="{ 'show': showRegisterModal }">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Register</h3>
+                <button class="close-modal" @click="showRegisterModal = false">&times;</button>
+            </div>
+            <form @submit.prevent="signUp">
+                <div class="form-group">
+                    <label for="register-name">Nama Lengkap</label>
+                    <input type="text" id="register-name" x-model="register.name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" x-model="register.email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" x-model="register.password" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Konfirmasi Password</label>
+                    <input type="password" id="register-confirm" x-model="register.confirmPassword" required>
+                </div>
+                <button type="submit" class="submit-btn" :disabled="isRegistering">
+                    <span x-show="!isRegistering">Daftar</span>
+                    <span x-show="isRegistering" class="loading"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+            <div x-show="notification.show"
+                 x-transition
+                 class="notification"
+                 :class="notification.type">
+                <i class="fas" :class="notification.type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
+                <span x-text="notification.message"></span>
+        </div>
+    <script>
+        // Supabase configuration - Ganti dengan URL dan Key Supabase Anda
+        const SUPABASE_URL = 'https://gnhynwlklmnamouyayyd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc';
+        
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function app() {
+            return {
+                darkMode: false,
+                user: null,
+                showLoginModal: false,
+                showRegisterModal: false,
+                isLoggingIn: false,
+                isRegistering: false,
+                isSubmitting: false,
+                newIdea: {
+                    name: '',
+                    jurusan: '',
+                    title: '',
+                    description: '',
+                    imageFile: null,
+                    imagePreview: null
+                },
+                login: {
+                    email: '',
+                    password: ''
+                },
+                register: {
+                    name: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: ''
+                },
+                ideas: [],
+                quotes: [
+                    {
+                        text: "Attitude is a little thing that makes a big difference.",
+                        author: "Winston Churchill"
+                    },
+                    {
+                        text: "Your attitude, not your aptitude, will determine your altitude.",
+                        author: "Zig Ziglar"
+                    },
+                    {
+                        text: "Innovation distinguishes between a leader and a follower.",
+                        author: "Steve Jobs"
+                    },
+                    {
+                        text: "The only way to do great work is to love what you do.",
+                        author: "Steve Jobs"
+                    },
+                    {
+                        text: "Success is not the key to happiness. Happiness is the key to success.",
+                        author: "Albert Schweitzer"
+                    }
+                ],
+                currentQuote: {},
+                notification: {
+                    show: false,
+                    message: '',
+                    type: 'success' // 'success' or 'error'
+                },
+                async init() {
+                    // Load quotes
+                    this.showRandomQuote();
+                    
+                    // Check if user is logged in
+                    const { data: { session } } = await supabase.auth.getSession();
+                    this.user = session?.user ?? null;
+                    
+                    // Load ideas
+                    await this.loadIdeas();
+                    
+                    // Listen for auth changes
+                    supabase.auth.onAuthStateChange((event, session) => {
+                        console.log('Auth state changed:', event, session);
+                        this.user = session?.user ?? null;
+                        if (event === 'SIGNED_IN') {
+                            this.showLoginModal = false;
+                            this.showRegisterModal = false;
+                            this.showNotification('Login berhasil!', 'success');
+                            this.loadIdeas();
+                        } else if (event === 'SIGNED_OUT') {
+                            this.showNotification('Anda telah logout', 'success');
+                        }
+                    });
+                },
+                showRandomQuote() {
+                    const randomIndex = Math.floor(Math.random() * this.quotes.length);
+                    this.currentQuote = this.quotes[randomIndex];
+                },
+                async loadIdeas() {
+                    try {
+                        // Load ideas with vote counts
+                        const { data: ideas, error } = await supabase
+                            .from('ideas')
+                                .select(`
+                                    *,
+                                    votes(count),
+                                 user_votes:votes(user_id)
+                                        `)
+                                    .order('created_at', { ascending: false });
+
+                            
+                        if (error) {
+                            console.error('Error loading ideas:', error);
+                            // Fallback to sample data if there's an error
+                            this.ideas = this.getSampleIdeas();
+                            return;
+                        }
+                        
+                        // Process ideas data
+                        this.ideas = ideas.map(idea => {
+                            const hasLiked = this.user ? 
+                                idea.user_votes.some(vote => vote.user_id === this.user.id) : 
+                                false;
+                                
+                            return {
+                                id: idea.id,
+                                user_name: idea.user_name,
+                                user_id: idea.user_id,
+                                jurusan: idea.jurusan,
+                                title: idea.title,
+                                description: idea.description,
+                                image_url: idea.image_url,
+                                votes_count: idea.votes[0]?.count || 0,
+                                hasLiked: hasLiked
+                            };
+                        });
+                    } catch (error) {
+                        console.error('Error loading ideas:', error);
+                        // Fallback to sample data
+                        this.ideas = this.getSampleIdeas();
+                    }
+                },
+                getSampleIdeas() {
+                    return [
+                        {
+                            id: 1,
+                            user_name: "Ahmad RPL",
+                            jurusan: "rpl",
+                            title: "Aplikasi Management Tugas Sekolah",
+                            description: "Aplikasi mobile untuk membantu siswa mengelola tugas sekolah dengan fitur reminder dan kolaborasi.",
+                            image_url: null,
+                            votes_count: 15,
+                            hasLiked: false
+                        },
+                        {
+                            id: 2,
+                            user_name: "Sari TKJ",
+                            jurusan: "tkj",
+                            title: "Jaringan IoT untuk Smart Classroom",
+                            description: "Implementasi jaringan Internet of Things untuk membuat ruang kelas pintar dengan kontrol otomatis.",
+                            image_url: null,
+                            votes_count: 12,
+                            hasLiked: false
+                        },
+                        {
+                            id: 3,
+                            user_name: "Budi PG",
+                            jurusan: "pg",
+                            title: "Game Edukasi Sejarah Indonesia",
+                            description: "Game mobile interaktif untuk mempelajari sejarah Indonesia dengan cara yang menyenangkan.",
+                            image_url: null,
+                            votes_count: 18,
+                            hasLiked: false
+                        }
+                    ];
+                },
+                handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        // Check if file is an image
+                        if (!file.type.match('image.*')) {
+                            this.showNotification('Harus memilih file gambar', 'error');
+                            return;
+                        }
+                        
+                        // Check file size (max 2MB)
+                        if (file.size > 2 * 1024 * 1024) {
+                            this.showNotification('Ukuran gambar maksimal 2MB', 'error');
+                            return;
+                        }
+                        
+                        this.newIdea.imageFile = file;
+                        
+                        // Create preview
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.newIdea.imagePreview = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+                removeImage() {
+                    this.newIdea.imageFile = null;
+                    this.newIdea.imagePreview = null;
+                },
+               async addIdea() {
+                if (!this.user) {
+              this.showNotification('Silakan login terlebih dahulu', 'error');
+                return;
+                }
+              if (this.newIdea.title.length < 5 || this.newIdea.title.length > 70) {
+             this.showNotification('Judul harus 5-70 karakter', 'error');
+                return;
+                }    
+                if (this.newIdea.description.length < 15 || this.newIdea.description.length > 3000) {
+                this.showNotification('Deskripsi harus 15-3000 karakter', 'error');
+                    return;
+                        }
+                this.isSubmitting = true;
+                    try {
+                let imageUrl = null;
+                        // Upload image if exists
+                        if (this.newIdea.imageFile) {
+                            const fileExt = this.newIdea.imageFile.name.split('.').pop();
+                            const fileName = `${Math.random()}.${fileExt}`;
+                            const filePath = `idea-images/${fileName}`;
+                            
+                            const { error: uploadError } = await supabase.storage
+                                .from('ideas')
+                                .upload(filePath, this.newIdea.imageFile);
+                                
+                            if (uploadError) throw uploadError;
+                            
+                            // Get public URL
+                            const { data: { publicUrl } } = supabase.storage
+                                .from('ideas')
+                                .getPublicUrl(filePath);
+                                
+                            imageUrl = publicUrl;
+                        }
+                        
+                        // Insert idea to database
+                        const { error } = await supabase
+                            .from('ideas')
+                            .insert([
+                                {
+                                    user_id: this.user.id,
+                                    user_name: this.newIdea.name || this.user.user_metadata.full_name || this.user.email,
+                                    jurusan: this.newIdea.jurusan,
+                                    title: this.newIdea.title,
+                                    description: this.newIdea.description,
+                                    image_url: imageUrl
+                                }
+                            ]);
+                            
+                        if (error) throw error;
+                        
+                        // Reset form
+                        this.newIdea = {
+                            name: '',
+                            jurusan: '',
+                            title: '',
+                            description: '',
+                            imageFile: null,
+                            imagePreview: null
+                        };
+                        
+                        // Reload ideas
+                        await this.loadIdeas();
+                        
+                        this.showNotification('Ide berhasil dikirim!', 'success');
+                    } catch (error) {
+                        console.error('Error adding idea:', error);
+                        this.showNotification('Gagal mengirim ide: ' + error.message, 'error');
+                    } finally {
+                        this.isSubmitting = false;
+                    }
+                },
+             async deleteIdea(ideaId, index) {
+                if (!confirm("Apakah kamu yakin ingin menghapus ide ini?")) return;
+                    try {
+                    const { error } = await supabase
+                    .from('ideas')
+                     .delete()
+                    .eq('id', ideaId)
+                    .eq('user_id', this.user.id); // pastikan hanya hapus ide milik sendiri
+                 if (error) throw error;
+                this.ideas.splice(index, 1); // hapus dari list di frontend juga
+                    this.showNotification("Ide berhasil dihapus", "success");
+                    } catch (error) {
+                    console.error("Error deleting idea:", error);
+                this.showNotification("Gagal menghapus ide: " + error.message, "error");
+                    }
+            },
+
+
+                async toggleLike(ideaId, index) {
+                    if (!this.user) {
+                        this.showNotification('Silakan login terlebih dahulu', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        const idea = this.ideas[index];
+                        
+                        if (idea.hasLiked) {
+                            // Unlike
+                            const { error } = await supabase
+                                .from('votes')
+                                .delete()
+                                .eq('idea_id', ideaId)
+                                .eq('user_id', this.user.id);
+                                
+                            if (error) throw error;
+                            
+                            this.ideas[index].votes_count--;
+                            this.ideas[index].hasLiked = false;
+                        } else {
+                            // Like
+                            const { error } = await supabase
+                                .from('votes')
+                                .insert([
+                                    { idea_id: ideaId, user_id: this.user.id }
+                                ]);
+                                
+                            if (error) throw error;
+                            
+                            this.ideas[index].votes_count++;
+                            this.ideas[index].hasLiked = true;
+                        }
+                    } catch (error) {
+                        console.error('Error toggling like:', error);
+                        this.showNotification('Gagal melakukan vote', 'error');
+                    }
+                },
+                async signIn() {
+                    this.isLoggingIn = true;
+                    
+                    try {
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(this.login.email)) {
+                            throw new Error('Format email tidak valid');
+                        }
+                        
+                        if (this.login.password.length < 6) {
+                            throw new Error('Password minimal 6 karakter');
+                        }
+                        
+                        const { data, error } = await supabase.auth.signInWithPassword({
+                            email: this.login.email,
+                            password: this.login.password,
+                        });
+                        
+                        if (error) throw error;
+                        
+                        // Reset login form
+                        this.login = {
+                            email: '',
+                            password: ''
+                        };
+                    } catch (error) {
+                        console.error('Error signing in:', error);
+                        this.showNotification(error.message, 'error');
+                    } finally {
+                        this.isLoggingIn = false;
+                    }
+                },
+                async signUp() {
+                    if (this.register.password !== this.register.confirmPassword) {
+                        this.showNotification('Konfirmasi password tidak sesuai', 'error');
+                        return;
+                    }
+                    
+                    if (this.register.password.length < 6) {
+                        this.showNotification('Password minimal 6 karakter', 'error');
+                        return;
+                    }
+                    
+                    this.isRegistering = true;
+                    
+                    try {
+                        // Validate email format
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(this.register.email)) {
+                            throw new Error('Format email tidak valid');
+                        }
+                        
+                        const { data, error } = await supabase.auth.signUp({
+                            email: this.register.email,
+                            password: this.register.password,
+                            options: {
+                                data: {
+                                    full_name: this.register.name
+                                }
+                            }
+                        });
+                        
+                        if (error) throw error;
+                        
+                        this.showNotification('Registrasi berhasil! Silakan login.', 'success');
+                        this.showRegisterModal = false;
+                        this.register = {
+                            name: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: ''
+                        };
+                    } catch (error) {
+                        console.error('Error signing up:', error);
+                        this.showNotification(error.message, 'error');
+                    } finally {
+                        this.isRegistering = false;
+                    }
+                },
+                async signOut() {
+                    try {
+                        const { error } = await supabase.auth.signOut();
+                        if (error) throw error;
+                    } catch (error) {
+                        console.error('Error signing out:', error);
+                        this.showNotification('Gagal logout', 'error');
+                    }
+                },
+                showNotification(message, type = 'success') {
+                    this.notification = {
+                        show: true,
+                        message,
+                        type
+                    };
+                    
+                    // Auto hide after 3 seconds
+                    setTimeout(() => {
+                        this.notification.show = false;
+                    }, 3000);
+                },
+                getJurusanName(jurusanCode) {
+                    const jurusanMap = {
+                        'rpl': 'RPL',
+                        'tkj': 'TKJ',
+                        'pg': 'Pengembangan Gim'
+                    };
+                    return jurusanMap[jurusanCode] || 'Unknown';
+                },
+                get topIdeas() {
+                    // Sort ideas by votes and return top 3
+                    return [...this.ideas]
+                        .sort((a, b) => b.votes_count - a.votes_count)
+                        .slice(0, 3);
+                }
+            };
+        }
+    </script>
+</body>
+</html>
