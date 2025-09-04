@@ -1260,52 +1260,45 @@
                     }
                 },
                 async signUp() {
-                    if (this.register.password !== this.register.confirmPassword) {
-                        this.showNotification('Konfirmasi password tidak sesuai', 'error');
-                        return;
-                    }
-                    
-                    if (this.register.password.length < 6) {
-                        this.showNotification('Password minimal 6 karakter', 'error');
-                        return;
-                    }
-                    
-                    this.isRegistering = true;
-                    
-                    try {
-                        // Validate email format
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        if (!emailRegex.test(this.register.email)) {
-                            throw new Error('Format email tidak valid');
-                        }
-                        
-                        const { data, error } = await supabase.auth.signUp({
-                            email: this.register.email,
-                            password: this.register.password,
-                            options: {
-                                data: {
-                                    full_name: this.register.name
-                                }
-                            }
-                        });
-                        
-                        if (error) throw error;
-                        
-                        this.showNotification('Registrasi berhasil! Silakan login.', 'success');
-                        this.showRegisterModal = false;
-                        this.register = {
-                            name: '',
-                            email: '',
-                            password: '',
-                            confirmPassword: ''
-                        };
-                    } catch (error) {
-                        console.error('Error signing up:', error);
-                        this.showNotification(error.message, 'error');
-                    } finally {
-                        this.isRegistering = false;
-                    }
-                },
+    if (this.register.password !== this.register.confirmPassword) {
+        this.showNotification('Konfirmasi password tidak sesuai', 'error');
+        return;
+    }
+    
+    if (this.register.password.length < 6) {
+        this.showNotification('Password minimal 6 karakter', 'error');
+        return;
+    }
+    
+    this.isRegistering = true;
+    
+    try {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.register.email)) {
+            throw new Error('Format email tidak valid');
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+            email: this.register.email,
+            password: this.register.password,
+            options: {
+                data: { full_name: this.register.name },
+                emailRedirectTo: "https://demo-inovative-moklet.vercel.app/" 
+            }
+        });
+
+        if (error) throw error;
+
+        this.showNotification('Registrasi berhasil! Silakan cek email untuk verifikasi.', 'success');
+        this.showRegisterModal = false;
+        this.register = { name: '', email: '', password: '', confirmPassword: '' };
+    } catch (error) {
+        console.error('Error signing up:', error);
+        this.showNotification(error.message, 'error');
+    } finally {
+        this.isRegistering = false;
+    }
+}
                 async signOut() {
                     try {
                         const { error } = await supabase.auth.signOut();
