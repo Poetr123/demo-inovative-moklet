@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useSupabase } from '../hooks/useSupabase';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../App';
 
 const IdeaForm = ({ onIdeaAdded }) => {
   const [title, setTitle] = useState('');
@@ -8,14 +7,18 @@ const IdeaForm = ({ onIdeaAdded }) => {
   const [department, setDepartment] = useState('RPL');
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const supabase = useSupabase();
-  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!title || !description) {
       alert('Judul dan deskripsi harus diisi');
+      return;
+    }
+
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) {
+      alert('Silakan login untuk membagikan ide');
       return;
     }
 
@@ -84,7 +87,7 @@ const IdeaForm = ({ onIdeaAdded }) => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-telkom-red dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 dark:bg-gray-700 dark:text-white"
             placeholder="Masukkan judul ide inovatifmu"
           />
         </div>
@@ -98,7 +101,7 @@ const IdeaForm = ({ onIdeaAdded }) => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows="4"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-telkom-red dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 dark:bg-gray-700 dark:text-white"
             placeholder="Jelaskan ide inovatifmu secara detail"
           ></textarea>
         </div>
@@ -111,7 +114,7 @@ const IdeaForm = ({ onIdeaAdded }) => {
             id="department"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-telkom-red dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 dark:bg-gray-700 dark:text-white"
           >
             <option value="RPL">Rekayasa Perangkat Lunak (RPL)</option>
             <option value="TKJ">Teknik Komputer dan Jaringan (TKJ)</option>
@@ -128,14 +131,14 @@ const IdeaForm = ({ onIdeaAdded }) => {
             type="file"
             accept="image/*"
             onChange={(e) => setImage(e.target.files[0])}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-telkom-red dark:bg-gray-700 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 dark:bg-gray-700 dark:text-white"
           />
         </div>
         
         <button
           type="submit"
           disabled={uploading}
-          className="bg-telkom-red text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
+          className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
         >
           {uploading ? 'Mengupload...' : 'Bagikan Ide'}
         </button>
