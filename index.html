@@ -795,13 +795,21 @@
                             <p class="idea-description" x-text="idea.description"></p>
                         </div>
                         <div class="idea-footer">
-                            <span x-text="idea.user_name"></span>
-                            <button class="vote-btn" :class="{ 'active': idea.hasLiked }" @click="toggleLike(idea.id, index)" :disabled="!user">
-                                <i class="fas fa-thumbs-up"></i>
-                                <span class="vote-count" x-text="idea.votes_count"></span>
-                            </button>
+                        <div class="idea-footer">
+                          <span x-text="idea.user_name"></span>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="vote-btn" :class="{ 'active': idea.hasLiked }"
+                        @click="toggleLike(idea.id, index)" :disabled="!user">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span class="vote-count" x-text="idea.votes_count"></span>
+                             </button>
+                            <button class="vote-btn" 
+                            x-show="user && user.id === idea.user_id"
+                            @click="deleteIdea(idea.id, index)">
+                            <i class="fas fa-trash"></i>
+                                 </button>
+                             </div>
                         </div>
-                    </div>
                 </template>
             </div>
         </section>
