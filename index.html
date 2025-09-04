@@ -628,30 +628,39 @@
             position: fixed;
             top: 20px;
             right: 20px;
+            max-width: 320px;
+            word-wrap: break-word;
             padding: 15px 20px;
-            border-radius: 6px;
-            background-color: var(--primary);
-            color: var(--secondary);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 1100;
             display: flex;
-            align-items: center;
+             align-items: center;
             gap: 10px;
-            transform: translateX(100%);
-            transition: transform 0.3s;
+
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        .notification.show {
-            transform: translateX(0);
+
+            .notification.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .notification.error {
-            background-color: #e74c3c;
+
+            .notification.success {
+            background-color: #2ecc71; /* hijau */
+            color: #fff;
         }
 
-        .notification.success {
-            background-color: #2ecc71;
+            .notification.error {
+            background-color: #e74c3c; /* merah */
+            color: #fff;
         }
+
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -1361,18 +1370,20 @@
                         this.showNotification('Gagal logout', 'error');
                     }
                 },
-                showNotification(message, type = 'success') {
-                    this.notification = {
-                        show: true,
-                        message,
-                        type
-                    };
-                    
-                    // Auto hide after 3 seconds
-                    setTimeout(() => {
-                        this.notification.show = false;
-                    }, 3000);
-                },
+               showNotification(message, type = 'success') {
+                this.notification = {
+                    show: true,
+                    message,
+                    type
+                };
+
+                  if (this._notifTimeout) {
+             clearTimeout(this._notifTimeout);
+                }
+                 this._notifTimeout = setTimeout(() => {
+                    this.notification.show = false;
+                }, 3000);
+            },
                 getJurusanName(jurusanCode) {
                     const jurusanMap = {
                         'rpl': 'RPL',
