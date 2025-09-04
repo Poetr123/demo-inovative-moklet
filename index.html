@@ -675,6 +675,51 @@
                 flex-direction: column;
                 align-items: center;
             }
+            .profile-page {
+                  max-width: 500px;
+                  margin: 30px auto;
+                  padding: 20px;
+                 background: #fff;
+                  border-radius: 10px;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+            .profile-form {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 20px;
+            }
+
+            .profile-image {
+             text-align: center;
+            }
+
+            .avatar-lg {
+              width: 120px;
+              height: 120px;
+              border-radius: 50%;
+              object-fit: cover;
+              margin-bottom: 10px;
+              border: 3px solid #ccc;
+            }
+
+            .form-group {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+            }
+
+                .form-actions {
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 10px;
+            }
+
+                button.danger {
+                  background-color: #e74c3c;
+                  color: white;
+            }
+
         }
     </style>
 </head>
@@ -814,8 +859,24 @@
         </template>
     </div>
 </section>
-
-
+            <section id="profile" x-show="page === 'profile'" class="profile-page">
+          <h2>Profil Saya</h2>
+              <div class="profile-form">
+                <div class="profile-image">
+                  <img :src="profile.profile_image || 'https://via.placeholder.com/120?text=No+Image'" 
+               alt="Foto Profil" class="avatar-lg">
+          <input type="file" @change="uploadProfileImage($event)">
+            </div>
+            <div class="form-group">
+      <label>Nama</label>
+      <input type="text" x-model="profile.name" placeholder="Masukkan nama kamu">
+    </div>
+    <div class="form-actions">
+      <button @click="saveProfile">💾 Simpan</button>
+      <button @click="deleteProfile" class="danger">🗑 Hapus Akun</button>
+    </div>
+  </div>
+</section>
         <section class="leaderboard" id="leaderboard">
             <h2>Top 3 Inovasi Siswa Minggu Ini</h2>
             <div class="leaderboard-items">
@@ -1004,6 +1065,63 @@
                     message: '',
                     type: 'success' // 'success' or 'error'
                 },
+                profile: {
+                      name: '',
+                      profile_image: ''
+                },
+                        async loadProfile() {
+                          if (!this.user) return;
+                         const { data, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', this.user.id)
+                        .single();
+                      if (data) {
+                    this.profile = data;
+                      }
+                    },
+            async saveProfile() {
+              if (!this.user) return;
+              const updates = {
+                id: this.user.id,
+                name: this.profile.name,
+                profile_image: this.profile.profile_image,
+                updated_at: new Date()
+                  };
+
+          const { error } = await supabase.from('profiles').upsert(updates);
+
+                  if (error) {
+            this.showNotification("Gagal menyimpan profil", "error");
+                  } else {
+                this.showNotification("Profil berhasil disimpan", "success");
+                this.loadProfile();
+              }
+                },
+
+                async uploadProfileImage(event) {
+                  const file = event.target.files[0];
+                      if (!file) return;
+              const filePath = `${this.user.id}/${Date.now()}_${file.name}`;
+                  let { error } = await supabase
+                        .storage
+                .from('profiles')
+                        .upload(filePath, file, { upsert: true });
+              if (error) {
+                    this.showNotification("Gagal upload gambar", "error");
+                return;
+                  }
+                      const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
+                      this.profile.profile_image = data.publicUrl;
+                    },
+                        async deleteProfile() {
+                             if (!confirm("Apakah kamu yakin ingin menghapus akun ini? Semua ide dan vote juga akan terhapus.")) return;
+                                  await supabase.from('profiles').delete().eq('id', this.user.id);
+                              await supabase.auth.signOut();
+                          this.user = null;
+                      this.showNotification("Akun berhasil dihapus", "success");
+                },
+
                 async init() {
                     this.showRandomQuote();
                     const { data: { session } } = await supabase.auth.getSession();
