@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verifikasi Email - Inovasi Siswa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .success {
+            color: #2ecc71;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success">✓</div>
+        <h1>Email Berhasil Diverifikasi!</h1>
+        <p>Anda akan diarahkan ke halaman utama dalam beberapa detik.</p>
+    </div>
+
+    <script>
+        // Inisialisasi Supabase
+        const supabase = window.supabase.createClient(
+            'https://gnhynwlklmnamouyayyd.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImduaHlud2xrbG1uYW1vdXlheXlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5ODEzNTYsImV4cCI6MjA3MjU1NzM1Nn0.lP8ReorP4CvZQ1QxFjCclRjLHChjjaF37ZBrSmA-InM'
+        );
+
+        // Setelah halaman dimuat, redirect ke halaman utama setelah 3 detik
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 3000);
+    </script>
+</body>
+</html>
