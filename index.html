@@ -935,13 +935,13 @@
             </form>
         </div>
     </div>
-
-    <!-- Notification -->
-    <div class="notification" :class="[notification.type, { 'show': notification.show }]">
-        <i class="fas" :class="notification.type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
-        <span x-text="notification.message"></span>
-    </div>
-
+            <div x-show="notification.show"
+                 x-transition
+                 class="notification"
+                 :class="notification.type">
+                <i class="fas" :class="notification.type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'"></i>
+                <span x-text="notification.message"></span>
+        </div>
     <script>
         // Supabase configuration - Ganti dengan URL dan Key Supabase Anda
         const SUPABASE_URL = 'https://gnhynwlklmnamouyayyd.supabase.co';
