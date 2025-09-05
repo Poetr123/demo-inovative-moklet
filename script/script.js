@@ -353,7 +353,7 @@
                             email: this.register.email,
                             password: this.register.password,
                             options: {
-                                emailRedirectTo: 'https://demo-inovative-moklet.vercel.app/auth/callback.html'
+                                emailRedirectTo: 'https://demo-inovative-moklet.vercel.app/auth/callback.html'}
                                 data: {
                                     full_name: this.register.name
                                 }
