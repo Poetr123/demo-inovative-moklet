@@ -356,6 +356,7 @@
                                 data: {
                                     full_name: this.register.name
                                 }
+                                emailRedirectTo: 'https://demo-inovative-moklet.vercel.app/auth/callback.html'
                             }
                         });
                         
