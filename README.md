@@ -3,6 +3,8 @@
 Website untuk menampung dan menyalurkan ide inovatif siswa.  
 Setiap siswa bisa membagikan ide, memberikan dukungan pada ide teman, dan melihat ide-ide terbaru secara terbuka.
 
+🔗 **Demo Web**: [https://demo-inovative-moklet.vercel.app/](https://demo-inovative-moklet.vercel.app/)
+
 ---
 
 ## 🔧 Backend
@@ -31,14 +33,13 @@ Bagian frontend dibangun dengan HTML, CSS, dan library ringan untuk membuat hala
 
 ---
 
----
-
 ## ⚠️ Disclaimer
 Website ini masih berupa **contoh/demo project** untuk keperluan seleksi OSIS.  
 Beberapa fitur teknis sudah berjalan dengan baik, namun sistem ini **belum dirancang untuk penggunaan skala penuh** dan masih mungkin memiliki celah.  
 
 Tujuan utama pembuatan website ini adalah **menunjukkan konsep** bagaimana ide-ide siswa dapat dikumpulkan, ditampilkan, dan didukung secara terbuka.  
 
+---
+
 ## 👨‍💻 Pengembang
 Website ini dibuat sebagai project seleksi OSIS untuk mendorong budaya kreatif dan partisipatif di kalangan siswa.
- 
