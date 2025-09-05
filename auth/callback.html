@@ -37,14 +37,26 @@
     <script>
         // Inisialisasi Supabase
         const supabase = window.supabase.createClient(
-            'https://gnhynwlklmnamouyayyd.supabase.co',
-            'sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc'
+            "https://gnhynwlklmnamouyayyd.supabase.co",
+            "sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc"
         );
 
-        // Setelah halaman dimuat, redirect ke halaman utama setelah 3 detik
-        setTimeout(() => {
-            window.location.href = '/';
-        }, 3000);
+        async function handleCallback() {
+            // Proses token yang dikirim Supabase via query string
+            const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+
+            if (error) {
+                console.error("Error verifikasi:", error.message);
+            } else {
+                console.log("Session aktif:", data.session);
+            }
+
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 3000);
+        }
+
+        handleCallback();
     </script>
 </body>
 </html>
