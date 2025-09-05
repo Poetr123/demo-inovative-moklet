@@ -1,5 +1,4 @@
-
-        // Supabase configuration
+ // Supabase configuration
         const SUPABASE_URL = 'https://gnhynwlklmnamouyayyd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_ocPX7B9ZooGAsjQhlZVHvA_h6_1Dsmc';
         
@@ -356,8 +355,7 @@
                             options: {
                                 data: {
                                     full_name: this.register.name
-                                },
-                                emailRedirectTo: 'https://demo-inovative-moklet.vercel.app/auth/callback.html'
+                                }
                             }
                         });
                         
